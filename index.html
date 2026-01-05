@@ -1,60 +1,95 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Conect Insights | Inteligência de Feedback</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
-    <style>
-      :root {
-        --brand-orange: #FF6B00;
-        --brand-navy: #0F172A;
-        --brand-slate: #1E293B;
-      }
-      body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; background-color: #F8FAFC; color: #1E293B; }
-      h1, h2, h3, .font-display { font-family: 'Outfit', sans-serif; letter-spacing: -0.02em; }
 
-      .brand-gradient {
-        background: linear-gradient(135deg, var(--brand-navy) 0%, var(--brand-slate) 100%);
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conect Insights | Inteligência de Feedback</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800;900&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --brand-orange: #FF6B00;
+      --brand-navy: #0F172A;
+      --brand-slate: #1E293B;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background-color: #F8FAFC;
+      color: #1E293B;
+    }
+
+    h1,
+    h2,
+    h3,
+    .font-display {
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-gradient {
+      background: linear-gradient(135deg, var(--brand-navy) 0%, var(--brand-slate) 100%);
+    }
+
+    .btn-primary {
+      background-color: var(--brand-orange);
+      color: white;
+      font-weight: 800;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-primary:hover {
+      background-color: #E66000;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px -6px rgba(255, 107, 0, 0.4);
+    }
+
+    .card-premium {
+      background: white;
+      border: 1px solid #E2E8F0;
+      border-radius: 1.5rem;
+      box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.05);
+    }
+
+    .glass-dark {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
       }
 
-      .btn-primary {
-        background-color: var(--brand-orange);
-        color: white;
-        font-weight: 800;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
-      .btn-primary:hover {
-        background-color: #E66000;
-        transform: translateY(-2px);
-        box-shadow: 0 12px 24px -6px rgba(255, 107, 0, 0.4);
-      }
+    }
 
-      .card-premium {
-        background: white;
-        border: 1px solid #E2E8F0;
-        border-radius: 1.5rem;
-        box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.05);
-      }
+    .animate-slideUp {
+      animation: slideUp 0.4s ease-out forwards;
+    }
 
-      .glass-dark {
-        background: rgba(15, 23, 42, 0.9);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
 
-      @keyframes slideUp {
-        from { opacity: 0; transform: translateY(15px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .animate-slideUp { animation: slideUp 0.4s ease-out forwards; }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-      .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-      .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
-    </style>
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #E2E8F0;
+      border-radius: 10px;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -66,10 +101,12 @@
   }
 }
 </script>
-</script>
+
 </head>
-  <body>
-    <div id="root"></div>
+
+<body>
+  <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>
