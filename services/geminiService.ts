@@ -3,7 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 import { SurveySubmission, AIAnalysisResult, Store, SurveyConfig } from "../types";
 
 export const analyzeSurveys = async (
-  surveys: SurveySubmission[], 
+  surveys: SurveySubmission[],
   stores: Store[],
   surveyConfigs: SurveyConfig[]
 ): Promise<AIAnalysisResult> => {
@@ -11,14 +11,14 @@ export const analyzeSurveys = async (
     throw new Error("Dados insuficientes.");
   }
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
-  // Mapeia todas as respostas para um formato legível para a IA, 
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+
+  // Mapeia todas as respostas para um formato legível para a IA,
   // independente de quais perguntas o usuário criou no admin.
   const context = surveys.map(s => {
     const store = stores.find(st => st.id === s.storeId);
     const config = surveyConfigs.find(c => c.id === s.surveyId);
-    
+
     const answers = Object.entries(s.answers).map(([qId, answer]) => {
       const q = config?.questions.find(question => question.id === qId);
       return {
