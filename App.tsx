@@ -1,15 +1,52 @@
-
+```typescript
 import React, { useState, useEffect, useMemo } from 'react';
-import { SurveySubmission, User, Store, AIAnalysisResult, SurveyQuestion, QuestionType, SurveyConfig } from '../types';
+import {
+  SurveySubmission,
+  User,
+  Store,
+  AIAnalysisResult,
+  SurveyQuestion,
+  QuestionType,
+  SurveyConfig
+} from './types';
 import { RatingScale } from './components/RatingScale';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { LoginPage } from './components/LoginPage';
 import { BooleanToggle } from './components/BooleanToggle';
-import { GENDER_OPTIONS, AGE_OPTIONS, STORES } from '../constants';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { analyzeSurveys } from './services/geminiService';
 import { supabase } from './services/supabaseClient';
+import {
+  Plus,
+  Trash2,
+  MapPin,
+  BarChart3,
+  Download,
+  Save,
+  CheckCircle,
+  Users,
+  Building,
+  Target,
+  FileText
+} from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
+import {
+  STORES,
+  GENDER_OPTIONS,
+  AGE_OPTIONS
+} from './constants';
 
 const DEFAULT_SURVEY: SurveyConfig = {
   id: 'ci-001',
@@ -200,7 +237,7 @@ const App: React.FC = () => {
 
             <div className="space-y-10 pt-4">
               {s?.questions.map(q => isVisible(q, formData.answers) && (
-                <div key={q.id} className={`space-y-4 animate-slideUp ${q.dependsOn ? 'ml-8 pl-8 border-l-4 border-[#FF6B00] bg-orange-50/20 p-8 rounded-r-3xl shadow-sm' : ''}`}>
+                <div key={q.id} className={`space - y - 4 animate - slideUp ${ q.dependsOn ? 'ml-8 pl-8 border-l-4 border-[#FF6B00] bg-orange-50/20 p-8 rounded-r-3xl shadow-sm' : '' } `}>
                   <label className="text-base font-bold text-slate-900 block leading-snug">{q.label}</label>
                   {q.type === 'text' && <textarea value={formData.answers[q.id] || ''} onChange={e => setFormData({ ...formData, answers: { ...formData.answers, [q.id]: e.target.value } })} className="w-full p-5 bg-white border border-slate-200 rounded-2xl outline-none focus:border-[#FF6B00] font-medium" rows={3} required={q.required} placeholder="Descreva aqui..." />}
                   {q.type === 'boolean' && (
@@ -239,7 +276,7 @@ const App: React.FC = () => {
             <div className="flex flex-wrap justify-center lg:justify-start gap-3 items-center">
               <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest mr-4">Período Analítico:</span>
               {TIME_FILTERS.map(tf => (
-                <button key={tf.value} onClick={() => setTimeFilter(tf.value)} className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase transition-all ${timeFilter === tf.value ? 'bg-[#0F172A] text-white shadow-xl' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>{tf.label}</button>
+                <button key={tf.value} onClick={() => setTimeFilter(tf.value)} className={`px - 6 py - 2.5 rounded - full text - [10px] font - black uppercase transition - all ${ timeFilter === tf.value ? 'bg-[#0F172A] text-white shadow-xl' : 'bg-slate-100 text-slate-400 hover:bg-slate-200' } `}>{tf.label}</button>
               ))}
             </div>
           </div>
@@ -288,7 +325,7 @@ const App: React.FC = () => {
                           <div className="text-[10px] font-bold text-[#FF6B00] uppercase tracking-widest mt-2">{stores.find(st => st.id === s.storeId)?.name}</div>
                         </td>
                         <td className="p-10">
-                          <div className={`inline-block px-5 py-2.5 rounded-xl text-[10px] font-black tracking-widest ${s.npsScore >= 9 ? 'bg-emerald-50 text-emerald-600' : s.npsScore <= 6 ? 'bg-rose-50 text-rose-600' : 'bg-orange-50 text-[#FF6B00]'}`}>SCORE {s.npsScore}</div>
+                          <div className={`inline - block px - 5 py - 2.5 rounded - xl text - [10px] font - black tracking - widest ${ s.npsScore >= 9 ? 'bg-emerald-50 text-emerald-600' : s.npsScore <= 6 ? 'bg-rose-50 text-rose-600' : 'bg-orange-50 text-[#FF6B00]' } `}>SCORE {s.npsScore}</div>
                         </td>
                         <td className="p-10 text-[11px] text-slate-300 font-bold text-right">{new Date(s.timestamp).toLocaleDateString('pt-BR')}</td>
                       </tr>
@@ -354,7 +391,7 @@ const App: React.FC = () => {
               {surveys.map(s => (
                 <div key={s.id} className="p-10 rounded-[2.5rem] border border-slate-100 bg-white hover:border-[#FF6B00] transition-all flex flex-col shadow-sm hover:shadow-2xl group">
                   <div className="flex justify-between items-start mb-12">
-                    <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${s.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>{s.isActive ? 'Em Coleta' : 'Rascunho'}</span>
+                    <span className={`px - 4 py - 2 rounded - xl text - [10px] font - black uppercase tracking - widest ${ s.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400' } `}>{s.isActive ? 'Em Coleta' : 'Rascunho'}</span>
                     <button onClick={() => { setEditingSurveyId(s.id); setAdminSubView('editor'); }} className="p-3 text-slate-300 hover:text-[#0F172A] transition-colors"><svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
                   </div>
                   <h3 className="font-display text-2xl mb-4 text-slate-900 leading-tight">{s.name}</h3>
@@ -523,7 +560,7 @@ const App: React.FC = () => {
 
                 <div className="space-y-12">
                   {s.questions.map((q, idx) => (
-                    <div key={q.id} className={`p-14 bg-white rounded-[4rem] border-2 transition-all ${q.dependsOn ? 'ml-16 border-orange-200 bg-orange-50/10 shadow-inner' : 'border-slate-100 shadow-xl shadow-slate-200/5'}`}>
+                    <div key={q.id} className={`p - 14 bg - white rounded - [4rem] border - 2 transition - all ${ q.dependsOn ? 'ml-16 border-orange-200 bg-orange-50/10 shadow-inner' : 'border-slate-100 shadow-xl shadow-slate-200/5' } `}>
                       <div className="flex gap-12 items-start">
                         <div className="bg-[#0F172A] text-white min-w-[4.5rem] h-18 rounded-[1.5rem] flex items-center justify-center font-black text-2xl shadow-lg">{idx + 1}</div>
                         <div className="flex-1 space-y-10">
@@ -532,7 +569,7 @@ const App: React.FC = () => {
                           <div className="flex flex-wrap gap-12 items-center">
                             <div className="flex bg-slate-100 p-2.5 rounded-[2rem] border border-slate-200 shadow-inner">
                               {(['text', 'boolean', 'rating'] as QuestionType[]).map(type => (
-                                <button key={type} onClick={() => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, type } : qu) } : sv))} className={`px-10 py-5 rounded-[1.5rem] text-[11px] font-black uppercase transition-all ${q.type === type ? 'bg-white text-[#0F172A] shadow-xl' : 'text-slate-400'}`}>
+                                <button key={type} onClick={() => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, type } : qu) } : sv))} className={`px - 10 py - 5 rounded - [1.5rem] text - [11px] font - black uppercase transition - all ${ q.type === type ? 'bg-white text-[#0F172A] shadow-xl' : 'text-slate-400' } `}>
                                   {type === 'text' ? 'Texto' : type === 'boolean' ? 'Sim/Não' : 'Score 0-5'}
                                 </button>
                               ))}
