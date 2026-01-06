@@ -513,6 +513,10 @@ const App: React.FC = () => {
                         });
                         if (authError) throw authError;
 
+                        if (authData.user) {
+                          await supabase.from('profiles').update({ assigned_store_id: s.value }).eq('id', authData.user.id);
+                        }
+
                         const newUser: User = {
                           id: authData.user?.id || Date.now().toString(),
                           username: u.value, password: p.value, role: 'MANAGER', assignedStoreId: s.value
