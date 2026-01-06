@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { NPSInput } from './components/NPSInput';
 import {
   SurveySubmission,
   User,
@@ -213,8 +214,7 @@ const App: React.FC = () => {
   const filteredSubmissions = useMemo(() => {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - timeFilter);
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - timeFilter);
+
     return submissions.filter(s => new Date(s.timestamp) >= cutoffDate && (!storeFilter || s.storeId === storeFilter));
   }, [submissions, timeFilter, storeFilter]);
 
@@ -321,7 +321,7 @@ const App: React.FC = () => {
                 </div>
               ))}
               <div className="pt-10 border-t border-slate-100">
-                <RatingScale label="Qual a nota para sua experiência hoje? (NPS)" max={10} value={formData.npsScore} onChange={v => setFormData({ ...formData, npsScore: v })} description="0 = Muito insatisfeito | 10 = Muito satisfeito" />
+                <NPSInput value={formData.npsScore} onChange={v => setFormData({ ...formData, npsScore: v })} />
               </div>
             </div>
 
@@ -345,107 +345,107 @@ const App: React.FC = () => {
           <div className="space-y-4 text-center lg:text-left">
             <h2 className="text-4xl font-display text-[#0F172A] tracking-tighter">Radar Estratégico</h2>
             <div className="flex flex-wrap justify-center lg:justify-start gap-3 items-center">
-              <div className="flex flex-wrap justify-center lg:justify-start gap-3 items-center">
-                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest mr-4">Filtros:</span>
-                <select value={storeFilter} onChange={e => setStoreFilter(e.target.value)} className="bg-slate-100 text-[10px] font-black uppercase p-2.5 rounded-xl outline-none text-slate-600 border border-slate-200">
-                  <option value="">Todas as Unidades</option>
-                  {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-                <div className="w-px h-6 bg-slate-200 mx-2"></div>
-                {TIME_FILTERS.map(tf => (
-                  <button key={tf.value} onClick={() => setTimeFilter(tf.value)} className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase transition-all ${timeFilter === tf.value ? 'bg-[#0F172A] text-white shadow-xl' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'} `}>{tf.label}</button>
-                ))}
+
+              <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest mr-4">Filtros:</span>
+              <select value={storeFilter} onChange={e => setStoreFilter(e.target.value)} className="bg-slate-100 text-[10px] font-black uppercase p-2.5 rounded-xl outline-none text-slate-600 border border-slate-200">
+                <option value="">Todas as Unidades</option>
+                {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+              <div className="w-px h-6 bg-slate-200 mx-2"></div>
+              {TIME_FILTERS.map(tf => (
+                <button key={tf.value} onClick={() => setTimeFilter(tf.value)} className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase transition-all ${timeFilter === tf.value ? 'bg-[#0F172A] text-white shadow-xl' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'} `}>{tf.label}</button>
+              ))}
+            </div>
+          </div>
+          <button disabled={isAnalyzing || filteredSubmissions.length === 0} onClick={async () => { setIsAnalyzing(true); try { setAiAnalysis(await analyzeSurveys(filteredSubmissions, stores, surveys)); } finally { setIsAnalyzing(false); } }} className="btn-primary px-16 py-6 rounded-[2rem] shadow-xl text-[11px] uppercase tracking-widest">
+            {isAnalyzing ? "Computando Tendências..." : "Processar Radar IA"}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="lg:col-span-2 space-y-12">
+            <div className="card-premium p-12 h-[520px]">
+              <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
+                <div>
+                  <h3 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">Desempenho NPS por Unidade</h3>
+                  <p className="text-[10px] text-slate-300 font-bold mt-1 uppercase tracking-widest">Radar: Últimos {timeFilter} dias</p>
+                </div>
+                <div className="flex gap-6">
+                  <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#0F172A] rounded-sm"></div><span className="text-[9px] font-black text-slate-400 uppercase">Top Performers</span></div>
+                  <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#FF6B00] rounded-sm"></div><span className="text-[9px] font-black text-slate-400 uppercase">Atenção</span></div>
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height="80%">
+                <BarChart data={stats}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 800 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10 }} domain={[0, 10]} />
+                  <Tooltip cursor={{ fill: '#F8FAFC' }} contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 30px 60px -10px rgba(0,0,0,0.15)', padding: '20px' }} />
+                  <Bar dataKey="nps" radius={[12, 12, 0, 0]} barSize={60}>
+                    {stats.map((entry, i) => <Cell key={i} fill={entry.nps >= 8.5 ? '#0F172A' : '#FF6B00'} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="card-premium overflow-hidden">
+              <div className="p-10 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                <span className="text-[11px] font-black uppercase text-slate-400 tracking-[0.3em]">Histórico de Feedbacks ({filteredSubmissions.length})</span>
+              </div>
+              <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
+                <table className="w-full text-left">
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredSubmissions.slice(0, 30).map(s => (
+                      <tr key={s.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="p-10">
+                          <div className="font-bold text-slate-900 text-lg leading-none">{s.customerName}</div>
+                          <div className="text-[10px] font-bold text-[#FF6B00] uppercase tracking-widest mt-2">{stores.find(st => st.id === s.storeId)?.name}</div>
+                        </td>
+                        <td className="p-10">
+                          <div className={`inline-block px-5 py-2.5 rounded-xl text-[10px] font-black tracking-widest ${s.npsScore >= 9 ? 'bg-emerald-50 text-emerald-600' : s.npsScore <= 6 ? 'bg-rose-50 text-rose-600' : 'bg-orange-50 text-[#FF6B00]'} `}>SCORE {s.npsScore}</div>
+                        </td>
+                        <td className="p-10 text-[11px] text-slate-300 font-bold text-right">{new Date(s.timestamp).toLocaleDateString('pt-BR')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
-            <button disabled={isAnalyzing || filteredSubmissions.length === 0} onClick={async () => { setIsAnalyzing(true); try { setAiAnalysis(await analyzeSurveys(filteredSubmissions, stores, surveys)); } finally { setIsAnalyzing(false); } }} className="btn-primary px-16 py-6 rounded-[2rem] shadow-xl text-[11px] uppercase tracking-widest">
-              {isAnalyzing ? "Computando Tendências..." : "Processar Radar IA"}
-            </button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <div className="lg:col-span-2 space-y-12">
-              <div className="card-premium p-12 h-[520px]">
-                <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
-                  <div>
-                    <h3 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">Desempenho NPS por Unidade</h3>
-                    <p className="text-[10px] text-slate-300 font-bold mt-1 uppercase tracking-widest">Radar: Últimos {timeFilter} dias</p>
-                  </div>
-                  <div className="flex gap-6">
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#0F172A] rounded-sm"></div><span className="text-[9px] font-black text-slate-400 uppercase">Top Performers</span></div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#FF6B00] rounded-sm"></div><span className="text-[9px] font-black text-slate-400 uppercase">Atenção</span></div>
-                  </div>
-                </div>
-                <ResponsiveContainer width="100%" height="80%">
-                  <BarChart data={stats}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 800 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10 }} domain={[0, 10]} />
-                    <Tooltip cursor={{ fill: '#F8FAFC' }} contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 30px 60px -10px rgba(0,0,0,0.15)', padding: '20px' }} />
-                    <Bar dataKey="nps" radius={[12, 12, 0, 0]} barSize={60}>
-                      {stats.map((entry, i) => <Cell key={i} fill={entry.nps >= 8.5 ? '#0F172A' : '#FF6B00'} />)}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+          <div className="space-y-12">
+            {aiAnalysis ? (
+              <div className="bg-[#0F172A] text-white p-12 rounded-[3.5rem] shadow-2xl space-y-12 relative overflow-hidden border-t-[14px] border-[#FF6B00] animate-slideUp">
+                <div className="relative z-10 space-y-10">
+                  <h3 className="text-3xl font-display text-[#FF6B00] border-b border-white/5 pb-6">Diagnóstico Radar</h3>
+                  <div className="bg-white/5 p-8 rounded-[2rem] italic leading-relaxed text-sm text-slate-300 border border-white/5 shadow-inner">"{aiAnalysis.summary}"</div>
 
-              <div className="card-premium overflow-hidden">
-                <div className="p-10 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                  <span className="text-[11px] font-black uppercase text-slate-400 tracking-[0.3em]">Histórico de Feedbacks ({filteredSubmissions.length})</span>
-                </div>
-                <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
-                  <table className="w-full text-left">
-                    <tbody className="divide-y divide-slate-100">
-                      {filteredSubmissions.slice(0, 30).map(s => (
-                        <tr key={s.id} className="hover:bg-slate-50 transition-colors">
-                          <td className="p-10">
-                            <div className="font-bold text-slate-900 text-lg leading-none">{s.customerName}</div>
-                            <div className="text-[10px] font-bold text-[#FF6B00] uppercase tracking-widest mt-2">{stores.find(st => st.id === s.storeId)?.name}</div>
-                          </td>
-                          <td className="p-10">
-                            <div className={`inline-block px-5 py-2.5 rounded-xl text-[10px] font-black tracking-widest ${s.npsScore >= 9 ? 'bg-emerald-50 text-emerald-600' : s.npsScore <= 6 ? 'bg-rose-50 text-rose-600' : 'bg-orange-50 text-[#FF6B00]'} `}>SCORE {s.npsScore}</div>
-                          </td>
-                          <td className="p-10 text-[11px] text-slate-300 font-bold text-right">{new Date(s.timestamp).toLocaleDateString('pt-BR')}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-12">
-              {aiAnalysis ? (
-                <div className="bg-[#0F172A] text-white p-12 rounded-[3.5rem] shadow-2xl space-y-12 relative overflow-hidden border-t-[14px] border-[#FF6B00] animate-slideUp">
-                  <div className="relative z-10 space-y-10">
-                    <h3 className="text-3xl font-display text-[#FF6B00] border-b border-white/5 pb-6">Diagnóstico Radar</h3>
-                    <div className="bg-white/5 p-8 rounded-[2rem] italic leading-relaxed text-sm text-slate-300 border border-white/5 shadow-inner">"{aiAnalysis.summary}"</div>
-
-                    <div className="space-y-6">
-                      <h4 className="text-[11px] font-black text-rose-400 uppercase tracking-[0.3em] border-l-4 border-rose-500 pl-4">Fatores de Ruptura</h4>
-                      {aiAnalysis.keyIssues.map((issue, i) => <div key={i} className="p-5 bg-rose-500/10 rounded-2xl border border-rose-500/20 text-xs font-semibold text-rose-100 flex items-center gap-4"><span>🔥</span> {issue}</div>)}
-                    </div>
-
-                    <div className="space-y-6">
-                      <h4 className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.3em] border-l-4 border-emerald-500 pl-4">Plano de Atendimento</h4>
-                      {aiAnalysis.recommendations.map((rec, i) => <div key={i} className="p-5 bg-emerald-500/10 rounded-2xl border border-emerald-500/10 text-xs text-slate-200 leading-snug flex items-start gap-4"><span>🚀</span> {rec}</div>)}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="card-premium p-20 flex flex-col items-center justify-center text-center space-y-10 min-h-[650px] border-dashed border-2">
-                  <div className="w-32 h-32 bg-slate-50 rounded-[3rem] flex items-center justify-center animate-pulse rotate-3">
-                    <svg className="w-16 h-16 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                  </div>
                   <div className="space-y-6">
-                    <p className="font-display text-2xl text-slate-900 tracking-tight leading-tight">Radar Conect Preditivo</p>
-                    <p className="text-slate-400 text-sm font-medium max-w-[280px] mx-auto leading-relaxed">Selecione um período acima e processe os dados para gerar o diagnóstico de inteligência preditiva Gemini.</p>
+                    <h4 className="text-[11px] font-black text-rose-400 uppercase tracking-[0.3em] border-l-4 border-rose-500 pl-4">Fatores de Ruptura</h4>
+                    {aiAnalysis.keyIssues.map((issue, i) => <div key={i} className="p-5 bg-rose-500/10 rounded-2xl border border-rose-500/20 text-xs font-semibold text-rose-100 flex items-center gap-4"><span>🔥</span> {issue}</div>)}
+                  </div>
+
+                  <div className="space-y-6">
+                    <h4 className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.3em] border-l-4 border-emerald-500 pl-4">Plano de Atendimento</h4>
+                    {aiAnalysis.recommendations.map((rec, i) => <div key={i} className="p-5 bg-emerald-500/10 rounded-2xl border border-emerald-500/10 text-xs text-slate-200 leading-snug flex items-start gap-4"><span>🚀</span> {rec}</div>)}
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="card-premium p-20 flex flex-col items-center justify-center text-center space-y-10 min-h-[650px] border-dashed border-2">
+                <div className="w-32 h-32 bg-slate-50 rounded-[3rem] flex items-center justify-center animate-pulse rotate-3">
+                  <svg className="w-16 h-16 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                </div>
+                <div className="space-y-6">
+                  <p className="font-display text-2xl text-slate-900 tracking-tight leading-tight">Radar Conect Preditivo</p>
+                  <p className="text-slate-400 text-sm font-medium max-w-[280px] mx-auto leading-relaxed">Selecione um período acima e processe os dados para gerar o diagnóstico de inteligência preditiva Gemini.</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        );
+      </div>
+    );
   };
 
   const renderAdmin = () => {
@@ -592,13 +592,13 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
-        );
+      );
     }
 
-        if (adminSubView === 'editor' && editingSurveyId) {
+    if (adminSubView === 'editor' && editingSurveyId) {
       const s = surveys.find(x => x.id === editingSurveyId);
-        if (!s) return null;
-        return (
+      if (!s) return null;
+      return (
         <div className="max-w-4xl mx-auto animate-slideUp pb-40">
           {/* Top Bar Fixa de Navegação */}
           <div className="sticky top-28 z-40 bg-white/90 backdrop-blur-xl border border-slate-200 p-4 rounded-2xl shadow-xl flex justify-between items-center mb-10">
@@ -760,39 +760,39 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
-        );
+      );
     }
   };
 
-        if (sessionLoading) {
+  if (sessionLoading) {
     return (
-        <div className="min-h-screen flex items-center justify-center brand-gradient">
-          <div className="text-white font-black uppercase tracking-[0.5em] animate-pulse">Iniciando Insights...</div>
-        </div>
-        );
+      <div className="min-h-screen flex items-center justify-center brand-gradient">
+        <div className="text-white font-black uppercase tracking-[0.5em] animate-pulse">Iniciando Insights...</div>
+      </div>
+    );
   }
 
-        if (!currentUser) {
+  if (!currentUser) {
     return <LoginPage onLogin={handleLogin} />;
   }
 
-        return (
-        <div className="min-h-screen pb-40">
-          <Header
-            currentUser={currentUser}
-            view={view}
-            onViewChange={setView}
-            onLogout={handleLogout}
-            onAdminClick={() => { setView('admin'); setAdminSubView('list'); }}
-          />
-          <main className="max-w-7xl mx-auto px-10 mt-20 min-h-[60vh]">
-            {view === 'survey' && renderSurvey()}
-            {view === 'dashboard' && renderDashboard()}
-            {view === 'admin' && renderAdmin()}
-          </main>
-          <Footer />
-        </div>
-        );
+  return (
+    <div className="min-h-screen pb-40">
+      <Header
+        currentUser={currentUser}
+        view={view}
+        onViewChange={setView}
+        onLogout={handleLogout}
+        onAdminClick={() => { setView('admin'); setAdminSubView('list'); }}
+      />
+      <main className="max-w-7xl mx-auto px-10 mt-20 min-h-[60vh]">
+        {view === 'survey' && renderSurvey()}
+        {view === 'dashboard' && renderDashboard()}
+        {view === 'admin' && renderAdmin()}
+      </main>
+      <Footer />
+    </div>
+  );
 };
 
-        export default App;
+export default App;
