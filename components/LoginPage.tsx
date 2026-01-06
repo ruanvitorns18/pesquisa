@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../../services/supabaseClient';
+import { supabase } from '../services/supabaseClient';
 
 interface LoginPageProps {
   onLogin: (username: string, password: string) => Promise<void>;
