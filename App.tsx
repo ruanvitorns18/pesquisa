@@ -246,6 +246,34 @@ const App: React.FC = () => {
                   {AGE_OPTIONS.map(a => <option key={a} value={a}>{a}</option>)}
                 </select>
               </div>
+
+              {/* Seletor de Loja (Apenas se não houver loja atribuída) */}
+              <div className="pt-2">
+                {currentUser?.assignedStoreId ? (
+                  <div className="flex items-center gap-2 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                    <div className="w-8 h-8 rounded-full bg-emerald-200 flex items-center justify-center text-emerald-700 font-bold"><MapPin className="w-4 h-4" /></div>
+                    <div>
+                      <div className="text-[10px] font-black uppercase text-emerald-400 tracking-widest">Unidade Vinculada</div>
+                      <div className="font-bold text-emerald-900">{stores.find(s => s.id === currentUser.assignedStoreId)?.name || 'Loja Desconhecida'}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Selecione a Unidade</label>
+                    <select
+                      value={formData.storeId}
+                      onChange={e => setFormData({ ...formData, storeId: e.target.value })}
+                      className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-semibold outline-none focus:border-[#FF6B00] shadow-sm appearance-none"
+                      required
+                    >
+                      <option value="">Selecione uma loja...</option>
+                      {stores.map(store => (
+                        <option key={store.id} value={store.id}>{store.name} - {store.city}/{store.state}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-10 pt-4">
