@@ -509,7 +509,7 @@ const App: React.FC = () => {
                         const { data: authData, error: authError } = await supabase.auth.signUp({
                           email: u.value,
                           password: p.value,
-                          options: { data: { full_name: u.value.split('@')[0], role: 'MANAGER' } }
+                          options: { data: { full_name: u.value.split('@')[0], role: 'MANAGER', assigned_store_id: s.value } }
                         });
                         if (authError) throw authError;
 
