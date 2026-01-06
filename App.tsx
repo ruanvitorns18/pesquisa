@@ -235,6 +235,9 @@ const App: React.FC = () => {
     const s = surveys.find(x => x.id === activeSurveyId);
     return (
       <div className="max-w-xl mx-auto animate-slideUp">
+        <div className="bg-emerald-500 text-white text-center py-2 font-black uppercase tracking-widest text-xs mb-4 rounded-full animate-bounce shadow-xl">
+          ✨ ATUALIZAÇÃO 100% OK - NPS CORRIGIDO ✨
+        </div>
         <div className="card-premium overflow-hidden border-t-[10px] border-[#FF6B00]">
           <div className="bg-[#0F172A] p-6 md:p-8 text-white flex justify-between items-center">
             <div>
