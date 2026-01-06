@@ -26,7 +26,15 @@ import {
   Users,
   Building,
   Target,
-  FileText
+  FileText,
+  MessageSquare,
+  Star,
+  ToggleLeft,
+  Settings,
+  ArrowRight,
+  Split,
+  ChevronDown,
+  LayoutGrid
 } from 'lucide-react';
 import {
   BarChart,
@@ -373,139 +381,130 @@ const App: React.FC = () => {
   const renderAdmin = () => {
     if (adminSubView === 'list') {
       return (
-        <div className="max-w-7xl mx-auto space-y-16 animate-slideUp pb-40">
-          <div className="card-premium p-12">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-16">
-              <div>
-                <h2 className="text-4xl font-display text-slate-900 tracking-tighter leading-none mb-4">Campanhas Estratégicas</h2>
-                <p className="text-slate-500 font-medium text-lg">Gerencie os fluxos de captura de insights.</p>
-              </div>
-              <button onClick={() => {
-                const newS: SurveyConfig = { id: Date.now().toString(), name: 'Nova Auditoria de PDV', description: 'Objetivo estratégico da coleta...', isActive: false, questions: [], createdAt: new Date().toISOString() };
-                setSurveys([...surveys, newS]); setEditingSurveyId(newS.id); setAdminSubView('editor');
-              }} className="btn-primary px-10 py-5 rounded-2xl text-xs uppercase tracking-widest shadow-xl">Criar Nova Campanha</button>
+        <div className="max-w-[1440px] mx-auto space-y-12 animate-slideUp pb-40">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-4">
+            <div>
+              <h2 className="text-4xl font-display text-slate-900 tracking-tighter leading-none mb-3">Campanhas Estratégicas</h2>
+              <p className="text-slate-500 font-medium">Gerencie os fluxos de captura de insights.</p>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-              {surveys.map(s => (
-                <div key={s.id} className="p-10 rounded-[2.5rem] border border-slate-100 bg-white hover:border-[#FF6B00] transition-all flex flex-col shadow-sm hover:shadow-2xl group">
-                  <div className="flex justify-between items-start mb-12">
-                    <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${s.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'} `}>{s.isActive ? 'Em Coleta' : 'Rascunho'}</span>
-                    <button onClick={() => { setEditingSurveyId(s.id); setAdminSubView('editor'); }} className="p-3 text-slate-300 hover:text-[#0F172A] transition-colors"><svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
-                  </div>
-                  <h3 className="font-display text-2xl mb-4 text-slate-900 leading-tight">{s.name}</h3>
-                  <p className="text-slate-400 text-sm font-medium mb-12 flex-1 line-clamp-3 leading-relaxed">{s.description}</p>
-                  <button onClick={() => { setEditingSurveyId(s.id); setAdminSubView('editor'); }} className="text-[#0F172A] text-[11px] font-black uppercase tracking-widest border-t border-slate-50 pt-8 group-hover:text-[#FF6B00] transition-colors text-left flex items-center justify-between">Ajustar Lógica <span>→</span></button>
-                </div>
-              ))}
-            </div>
+            <button onClick={() => {
+              const newS: SurveyConfig = { id: Date.now().toString(), name: 'Nova Auditoria', description: 'Objetivo estratégico...', isActive: false, questions: [], createdAt: new Date().toISOString() };
+              setSurveys([...surveys, newS]); setEditingSurveyId(newS.id); setAdminSubView('editor');
+            }} className="btn-primary px-8 py-4 rounded-2xl text-[11px] uppercase tracking-widest shadow-xl flex items-center gap-2 hover:scale-105 transition-transform"><Plus className="w-4 h-4" /> Nova Campanha</button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div className="card-premium p-12 border-t-[10px] border-[#0F172A]">
-              <h3 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.3em] mb-12">Unidades da Rede</h3>
-              <div className="space-y-4 max-h-[450px] overflow-y-auto custom-scrollbar pr-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {surveys.map(s => (
+              <div key={s.id} className="p-8 rounded-[2rem] border border-slate-200 bg-white hover:border-[#FF6B00] transition-all flex flex-col shadow-sm hover:shadow-2xl group relative overflow-hidden">
+                <div className={`absolute top-0 right-0 p-4 rounded-bl-[2rem] ${s.isActive ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                  {s.isActive ? <CheckCircle className="w-5 h-5" /> : <Settings className="w-5 h-5" />}
+                </div>
+                <div className="mb-8 mt-2">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center mb-4 text-[#FF6B00]">
+                    <Target className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-display text-xl mb-2 text-slate-900 leading-tight">{s.name}</h3>
+                  <p className="text-slate-400 text-xs font-medium line-clamp-2 leading-relaxed">{s.description}</p>
+                </div>
+                <button onClick={() => { setEditingSurveyId(s.id); setAdminSubView('editor'); }} className="mt-auto w-full py-4 bg-slate-50 rounded-xl text-[#0F172A] text-[10px] font-black uppercase tracking-widest hover:bg-[#0F172A] hover:text-white transition-all flex items-center justify-center gap-2 group-hover:shadow-lg">
+                  Editar Fluxo <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
+            {/* Componente de Unidades da Rede - Mantendo similar mas com visual atualizado */}
+            <div className="card-premium p-8 border-t-[8px] border-[#0F172A]">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="bg-slate-100 p-3 rounded-xl"><Building className="w-5 h-5 text-slate-700" /></div>
+                <h3 className="text-lg font-display text-slate-900 tracking-tight">Unidades da Rede</h3>
+              </div>
+              <div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
                 {stores.map(st => (
-                  <div key={st.id} className="p-6 bg-slate-50 rounded-2xl flex justify-between items-center border border-slate-200 group hover:bg-white hover:border-[#FF6B00] transition-all">
-                    <span className="font-bold text-slate-900 text-base">{st.name}</span>
-                    <button onClick={() => setStores(stores.filter(x => x.id !== st.id))} className="text-[10px] font-black text-rose-300 hover:text-rose-600 uppercase opacity-0 group-hover:opacity-100 transition-all tracking-widest">Remover</button>
+                  <div key={st.id} className="p-4 bg-slate-50 rounded-xl flex justify-between items-center border border-slate-100 group hover:border-[#FF6B00] transition-all">
+                    <span className="font-bold text-slate-700 text-sm">{st.name}</span>
+                    <button onClick={() => setStores(stores.filter(x => x.id !== st.id))} className="p-2 text-rose-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 ))}
-                <div className="flex gap-4 pt-8">
-                  <input id="store-new" type="text" placeholder="Nome da Unidade" className="flex-1 p-5 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:border-[#FF6B00]" />
+                <div className="flex gap-3 pt-4">
+                  <input id="store-new" type="text" placeholder="Nome da Unidade" className="flex-1 p-4 bg-white border border-slate-200 rounded-xl font-bold text-xs outline-none focus:border-[#FF6B00] focus:ring-4 focus:ring-orange-500/10 transition-all" />
                   <button onClick={() => {
                     const i = document.getElementById('store-new') as HTMLInputElement;
                     if (i.value) setStores([...stores, { id: Date.now().toString(), name: i.value }]);
                     i.value = '';
-                  }} className="bg-[#0F172A] text-white px-10 rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-slate-800 shadow-xl">Cadastrar</button>
+                  }} className="bg-[#0F172A] text-white px-6 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 shadow-xl transition-all"><Plus className="w-4 h-4" /></button>
                 </div>
               </div>
             </div>
 
-            <div className="card-premium p-12 border-t-[10px] border-[#0F172A]">
-              <h3 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.3em] mb-12">Equipe de Insights</h3>
-              <div className="space-y-8">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <label className="text-[11px] font-bold text-slate-400 uppercase ml-2">Usuário</label>
-                    <input id="adm-user" type="text" className="w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:border-[#FF6B00]" />
+            {/* Componente de Equipe - Visual atualizado */}
+            <div className="card-premium p-8 border-t-[8px] border-[#0F172A]">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="bg-slate-100 p-3 rounded-xl"><Users className="w-5 h-5 text-slate-700" /></div>
+                <h3 className="text-lg font-display text-slate-900 tracking-tight">Gestores de Insights</h3>
+              </div>
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Usuário</label>
+                    <input id="adm-user" type="text" className="w-full p-4 bg-white border border-slate-200 rounded-xl font-bold text-xs outline-none focus:border-[#FF6B00] transition-all" />
                   </div>
-                  <div className="space-y-3">
-                    <label className="text-[11px] font-bold text-slate-400 uppercase ml-2">Senha</label>
-                    <input id="adm-key" type="password" className="w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:border-[#FF6B00]" />
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Senha</label>
+                    <input id="adm-key" type="password" className="w-full p-4 bg-white border border-slate-200 rounded-xl font-bold text-xs outline-none focus:border-[#FF6B00] transition-all" />
                   </div>
                 </div>
-                <div className="space-y-3">
-                  <label className="text-[11px] font-bold text-slate-400 uppercase ml-2">Unidade Alocada</label>
-                  <select id="adm-store" className="w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:border-[#FF6B00]">
-                    <option value="">Selecione a Unidade...</option>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Unidade</label>
+                  <select id="adm-store" className="w-full p-4 bg-white border border-slate-200 rounded-xl font-bold text-xs outline-none focus:border-[#FF6B00] transition-all cursor-pointer">
+                    <option value="">Selecione...</option>
                     {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                 </div>
                 <button
                   type="button"
                   onClick={async (e) => {
-                    e.preventDefault(); // Garantia extra
+                    e.preventDefault();
                     const u = document.getElementById('adm-user') as HTMLInputElement;
                     const p = document.getElementById('adm-key') as HTMLInputElement;
                     const s = document.getElementById('adm-store') as HTMLSelectElement;
 
                     if (u.value && p.value && s.value) {
                       try {
-                        // 1. Cadastra no Supabase Auth
-                        // Nota: signUp pode alterar a sessão atual no cliente.
-                        // O ideal seria usar uma Edge Function para criar usuários sem deslogar o admin.
-                        // Como paliativo, salvamos a sessão atual? Não, o client mudará.
-                        // Vamos apenas alertar e observar o comportamento.
-
                         const { data: authData, error: authError } = await supabase.auth.signUp({
                           email: u.value,
                           password: p.value,
-                          options: {
-                            data: {
-                              full_name: u.value.split('@')[0],
-                              role: 'MANAGER'
-                            }
-                          }
+                          options: { data: { full_name: u.value.split('@')[0], role: 'MANAGER' } }
                         });
-
                         if (authError) throw authError;
 
-                        // 2. Cria o perfil no banco local/state
                         const newUser: User = {
                           id: authData.user?.id || Date.now().toString(),
-                          username: u.value,
-                          password: p.value, // Apenas para visualização local demo
-                          role: 'MANAGER',
-                          assignedStoreId: s.value
+                          username: u.value, password: p.value, role: 'MANAGER', assignedStoreId: s.value
                         };
-
                         setUsers([...users, newUser]);
-
-                        // Limpar formulário
-                        u.value = '';
-                        p.value = '';
-                        s.value = '';
-
-                        alert('Gestor cadastrado com sucesso! (Verifique se manteve a sessão de admin)');
+                        u.value = ''; p.value = ''; s.value = '';
+                        alert('Gestor cadastrado!');
                       } catch (error: any) {
-                        console.error('Erro ao cadastrar gestor:', error);
-                        alert('Erro ao cadastrar gestor: ' + (error.message || 'Erro desconhecido'));
+                        alert('Erro: ' + (error.message || 'Desconhecido'));
                       }
-                    } else {
-                      alert('Preencha todos os campos!');
                     }
-                  }} className="w-full btn-primary py-6 rounded-2xl text-[11px] uppercase tracking-widest">Habilitar Gestor</button>
+                  }} className="w-full btn-primary py-4 rounded-xl text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                  <CheckCircle className="w-4 h-4" /> Habilitar Acesso
+                </button>
 
-                <div className="pt-10 space-y-4">
-                  <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest border-b border-slate-50 block pb-2">Gestores Ativos</label>
+                <div className="pt-6 space-y-2 max-h-[150px] overflow-y-auto custom-scrollbar">
                   {users.map(usr => (
-                    <div key={usr.id} className="flex justify-between items-center p-5 border border-slate-100 rounded-2xl bg-slate-50/50 hover:bg-white transition-all shadow-sm">
-                      <div>
-                        <span className="font-bold text-sm text-slate-800 tracking-tight">{usr.username}</span>
-                        <span className="text-slate-400 text-[9px] font-black uppercase ml-4 tracking-[0.2em]">({stores.find(x => x.id === usr.assignedStoreId)?.name})</span>
+                    <div key={usr.id} className="flex justify-between items-center p-3 border border-slate-100 rounded-xl bg-slate-50/50 hover:bg-white transition-all">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#0F172A] flex items-center justify-center text-white font-bold text-[10px]">{usr.username.charAt(0).toUpperCase()}</div>
+                        <div>
+                          <div className="font-bold text-xs text-slate-800">{usr.username}</div>
+                          <div className="text-slate-400 text-[9px] font-black uppercase tracking-wider">{stores.find(x => x.id === usr.assignedStoreId)?.name}</div>
+                        </div>
                       </div>
-                      <button onClick={() => setUsers(users.filter(x => x.id !== usr.id))} className="text-[10px] text-rose-300 hover:text-rose-600 font-black uppercase tracking-widest">Revogar</button>
+                      <button onClick={() => setUsers(users.filter(x => x.id !== usr.id))} className="text-rose-400 hover:text-rose-600 p-2"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   ))}
                 </div>
@@ -520,72 +519,155 @@ const App: React.FC = () => {
       const s = surveys.find(x => x.id === editingSurveyId);
       if (!s) return null;
       return (
-        <div className="max-w-5xl mx-auto animate-slideUp pb-40">
-          <div className="card-premium overflow-hidden border-t-[14px] border-[#0F172A]">
-            <div className="p-12 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-              <div className="space-y-2">
-                <button onClick={() => setAdminSubView('list')} className="text-[#0F172A] text-[11px] font-black uppercase flex items-center gap-3 mb-3 hover:-translate-x-1 transition-all">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M15 19l-7-7 7-7" /></svg>
-                  Gestão de Campanhas
-                </button>
-                <h2 className="text-4xl font-display tracking-tighter">Editor de Fluxo</h2>
+        <div className="max-w-4xl mx-auto animate-slideUp pb-40">
+          {/* Top Bar Fixa de Navegação */}
+          <div className="sticky top-28 z-40 bg-white/90 backdrop-blur-xl border border-slate-200 p-4 rounded-2xl shadow-xl flex justify-between items-center mb-10">
+            <button onClick={() => setAdminSubView('list')} className="text-slate-500 hover:text-[#0F172A] text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-colors">
+              <ArrowRight className="w-4 h-4 rotate-180" /> Voltar
+            </button>
+            <div className="flex items-center gap-4">
+              <div className="text-right hidden sm:block">
+                <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Status da Campanha</div>
+                <div className={`text-xs font-bold ${s.isActive ? 'text-emerald-600' : 'text-slate-500'}`}>{s.isActive ? 'Ativa no App' : 'Em Rascunho'}</div>
               </div>
-              <label className="flex items-center gap-6 cursor-pointer bg-white px-12 py-6 rounded-[2.5rem] shadow-sm border border-slate-200">
-                <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Habilitar Coleta</span>
-                <input type="checkbox" checked={s.isActive} onChange={e => setSurveys(surveys.map(x => x.id === s.id ? { ...x, isActive: e.target.checked } : x))} className="w-8 h-8 accent-[#FF6B00]" />
-              </label>
+              <button onClick={() => setSurveys(surveys.map(x => x.id === s.id ? { ...x, isActive: !x.isActive } : x))} className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${s.isActive ? 'bg-emerald-500 justify-end' : 'bg-slate-200 justify-start'}`}>
+                <div className="w-4 h-4 bg-white rounded-full shadow-md"></div>
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-8">
+            {/* Header da Campanha */}
+            <div className="card-premium p-8 bg-gradient-to-br from-white to-slate-50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Target className="w-3 h-3" /> Título</label>
+                  <input type="text" value={s.name} onChange={e => setSurveys(surveys.map(x => x.id === s.id ? { ...x, name: e.target.value } : x))} className="w-full bg-transparent border-b-2 border-slate-200 text-2xl font-display font-bold text-slate-800 focus:border-[#FF6B00] outline-none pb-2 transition-all placeholder:text-slate-300" placeholder="Ex: Auditoria Quinzenal" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><FileText className="w-3 h-3" /> Descrição Breve</label>
+                  <input type="text" value={s.description} onChange={e => setSurveys(surveys.map(x => x.id === s.id ? { ...x, description: e.target.value } : x))} className="w-full bg-transparent border-b-2 border-slate-200 text-sm font-medium text-slate-600 focus:border-[#FF6B00] outline-none pb-2 transition-all placeholder:text-slate-300" placeholder="Ex: Foco em ruptura e atendimento" />
+                </div>
+              </div>
             </div>
 
-            <div className="p-16 space-y-16">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div className="space-y-4">
-                  <label className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">Título da Campanha</label>
-                  <input type="text" value={s.name} onChange={e => setSurveys(surveys.map(x => x.id === s.id ? { ...x, name: e.target.value } : x))} className="w-full p-8 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-bold text-2xl outline-none focus:border-[#FF6B00] transition-all" />
-                </div>
-                <div className="space-y-4">
-                  <label className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">Estratégia de Captura</label>
-                  <input type="text" value={s.description} onChange={e => setSurveys(surveys.map(x => x.id === s.id ? { ...x, description: e.target.value } : x))} className="w-full p-8 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-bold text-2xl outline-none focus:border-[#FF6B00] transition-all" />
-                </div>
-              </div>
+            {/* Lista de Perguntas (Blocos Visuais) */}
+            <div className="space-y-6">
+              {s.questions.map((q, idx) => (
+                <div key={q.id} className="relative group">
+                  <div className="absolute -left-4 top-8 -bottom-8 w-0.5 bg-slate-200 group-last:hidden"></div>
+                  <div className={`card-premium p-8 border-l-[6px] transition-all hover:shadow-xl ${q.dependsOn ? 'border-orange-400 ml-8 bg-orange-50/30' : 'border-[#0F172A]'}`}>
 
-              <div className="space-y-12">
-                <div className="flex justify-between items-center border-t-2 border-slate-50 pt-16">
-                  <h3 className="text-xl font-display text-[#0F172A] uppercase tracking-[0.1em] flex items-center gap-5"><span>📋</span> Fluxograma Analítico</h3>
-                  <button onClick={() => {
-                    const newQ = { id: Date.now().toString(), label: 'Nova Pergunta Analítica', type: 'text' as const, required: true };
-                    setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: [...sv.questions, newQ] } : sv));
-                  }} className="bg-[#0F172A] text-white px-12 py-6 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-2xl transition-all">+ Inserir Pergunta</button>
-                </div>
+                    {/* Topo do Card: Número e Ações */}
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${q.dependsOn ? 'bg-orange-100 text-orange-600' : 'bg-[#0F172A] text-white'}`}>
+                          {idx + 1}
+                        </div>
+                        {q.dependsOn && (
+                          <div className="flex items-center gap-2 px-3 py-1 bg-orange-100 rounded-full border border-orange-200">
+                            <Split className="w-3 h-3 text-orange-600" />
+                            <span className="text-[9px] font-bold text-orange-700 uppercase tracking-widest">Condicional</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.filter(qu => qu.id !== q.id) } : sv))} className="p-2 text-rose-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all" title="Remover Pergunta">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
 
-                <div className="space-y-12">
-                  {s.questions.map((q, idx) => (
-                    <div key={q.id} className={`p-14 bg-white rounded-[4rem] border-2 transition-all ${q.dependsOn ? 'ml-16 border-orange-200 bg-orange-50/10 shadow-inner' : 'border-slate-100 shadow-xl shadow-slate-200/5'} `}>
-                      <div className="flex gap-12 items-start">
-                        <div className="bg-[#0F172A] text-white min-w-[4.5rem] h-18 rounded-[1.5rem] flex items-center justify-center font-black text-2xl shadow-lg">{idx + 1}</div>
-                        <div className="flex-1 space-y-10">
-                          <input type="text" value={q.label} onChange={e => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, label: e.target.value } : qu) } : sv))} placeholder="Qual informação deseja extrair?" className="w-full bg-transparent text-4xl font-bold text-slate-900 outline-none border-b-2 border-transparent focus:border-[#FF6B00] pb-6 transition-all tracking-tight" />
+                    {/* Conteúdo Principal */}
+                    <div className="space-y-6">
+                      {/* Pergunta */}
+                      <input
+                        type="text"
+                        value={q.label}
+                        onChange={e => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, label: e.target.value } : qu) } : sv))}
+                        className="w-full text-lg font-bold text-slate-800 bg-transparent outline-none placeholder:text-slate-300 border-none p-0 focus:ring-0"
+                        placeholder="Digite aqui a pergunta..."
+                      />
 
-                          <div className="flex flex-wrap gap-12 items-center">
-                            <div className="flex bg-slate-100 p-2.5 rounded-[2rem] border border-slate-200 shadow-inner">
-                              {(['text', 'boolean', 'rating'] as QuestionType[]).map(type => (
-                                <button key={type} onClick={() => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, type } : qu) } : sv))} className={`px-10 py-5 rounded-[1.5rem] text-[11px] font-black uppercase transition-all ${q.type === type ? 'bg-white text-[#0F172A] shadow-xl' : 'text-slate-400'} `}>
-                                  {type === 'text' ? 'Texto' : type === 'boolean' ? 'Sim/Não' : 'Score 0-5'}
-                                </button>
-                              ))}
-                            </div>
-                            <label className="flex items-center gap-5 cursor-pointer group">
-                              <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] group-hover:text-[#0F172A] transition-colors">Obrigatório</span>
-                              <input type="checkbox" checked={q.required} onChange={e => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, required: e.target.checked } : qu) } : sv))} className="accent-[#FF6B00] w-8 h-8" />
-                            </label>
-                            <button onClick={() => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.filter(qu => qu.id !== q.id) } : sv))} className="text-[11px] font-black uppercase text-rose-300 hover:text-rose-600 transition-colors ml-auto tracking-[0.3em]">Remover Campo</button>
+                      <div className="border-t border-slate-100 pt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        {/* Seletor de Tipo (Visual) */}
+                        <div className="lg:col-span-12 space-y-3">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tipo de Resposta</label>
+                          <div className="grid grid-cols-3 gap-3">
+                            {[
+                              { type: 'text', icon: MessageSquare, label: 'Texto Livre' },
+                              { type: 'boolean', icon: ToggleLeft, label: 'Sim / Não' },
+                              { type: 'rating', icon: Star, label: 'Nota 1-5' }
+                            ].map((typeObj) => (
+                              <button
+                                key={typeObj.type}
+                                onClick={() => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, type: typeObj.type as any } : qu) } : sv))}
+                                className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all ${q.type === typeObj.type ? 'bg-slate-800 border-slate-800 text-white shadow-lg ring-2 ring-slate-800 ring-offset-2' : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300 hover:bg-slate-50'}`}
+                              >
+                                <typeObj.icon className="w-5 h-5" />
+                                <span className="text-[10px] font-bold uppercase">{typeObj.label}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Configurações Extras */}
+                        <div className="lg:col-span-12 flex flex-wrap items-center gap-6 pt-2">
+                          <label className="flex items-center gap-3 cursor-pointer p-3 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition-all select-none">
+                            <input type="checkbox" checked={q.required} onChange={e => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, required: e.target.checked } : qu) } : sv))} className="accent-[#FF6B00] w-4 h-4" />
+                            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wide">Resposta Obrigatória</span>
+                          </label>
+
+                          {/* Construtor de Condição (Lógica) */}
+                          <div className="flex-1 min-w-[200px]">
+                            {q.dependsOn ? (
+                              <div className="flex items-center gap-2 p-2 bg-orange-50 border border-orange-200 rounded-xl animate-scaleIn">
+                                <Split className="w-4 h-4 text-orange-500 ml-2" />
+                                <select
+                                  value={q.dependsOn.questionId}
+                                  onChange={e => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, dependsOn: { ...qu.dependsOn!, questionId: e.target.value } } : qu) } : sv))}
+                                  className="bg-transparent text-[10px] font-bold text-orange-800 outline-none border-b border-orange-300 w-24"
+                                >
+                                  {s.questions.slice(0, idx).map(prevQ => (
+                                    <option key={prevQ.id} value={prevQ.id}>{prevQ.label.substring(0, 15)}...</option>
+                                  ))}
+                                </select>
+                                <span className="text-[9px] font-black text-orange-400 uppercase">=</span>
+                                <input
+                                  type="text"
+                                  value={q.dependsOn.value}
+                                  onChange={e => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, dependsOn: { ...qu.dependsOn!, value: e.target.value } } : qu) } : sv))}
+                                  className="bg-white px-2 py-1 rounded text-[10px] font-bold text-orange-800 outline-none w-20 border border-orange-200 focus:border-orange-400"
+                                  placeholder="Valor..."
+                                />
+                                <button onClick={() => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, dependsOn: undefined } : qu) } : sv))} className="ml-auto p-1 hover:bg-orange-200 rounded-full text-orange-600"><Trash2 className="w-3 h-3" /></button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, dependsOn: { questionId: s.questions[0]?.id || '', value: 'Sim' } } : qu) } : sv))}
+                                disabled={idx === 0}
+                                className={`flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed text-[10px] font-bold uppercase tracking-widest transition-all ${idx === 0 ? 'opacity-50 cursor-not-allowed border-slate-200 text-slate-300' : 'border-slate-300 text-slate-500 hover:border-orange-400 hover:text-orange-600 hover:bg-orange-50'}`}
+                              >
+                                <Split className="w-4 h-4" /> Adicionar Condição Lógica
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
+              ))}
+
+              <div className="flex justify-center pt-8 pb-16">
+                <button onClick={() => {
+                  const newQ = { id: Date.now().toString(), label: '', type: 'text' as const, required: true };
+                  setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: [...sv.questions, newQ] } : sv));
+                }} className="flex items-center gap-3 bg-[#0F172A] text-white px-10 py-5 rounded-[2rem] shadow-xl hover:scale-105 hover:shadow-2xl transition-all group">
+                  <div className="bg-white/20 p-1 rounded-full"><Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" /></div>
+                  <span className="text-xs font-black uppercase tracking-[0.2em]">Adicionar Nova Pergunta</span>
+                </button>
               </div>
-              <button onClick={() => setAdminSubView('list')} className="w-full bg-[#0F172A] text-white py-10 rounded-[3rem] font-black uppercase tracking-[0.5em] shadow-2xl transition-all hover:bg-slate-800 text-sm">Validar e Sincronizar Arquitetura</button>
             </div>
           </div>
         </div>
