@@ -110,7 +110,9 @@ const App: React.FC = () => {
     return (localStorage.getItem('ci_last_view') as any) || 'survey';
   });
   const [adminSubView, setAdminSubView] = useState<'list' | 'editor'>('list');
-  const [activeSurveyId, setActiveSurveyId] = useState<string>(() => surveys.find(s => s.isActive)?.id || surveys[0]?.id || '');
+  const [activeSurveyId, setActiveSurveyId] = useState<string>(() => {
+    return localStorage.getItem('ci_active_survey_id') || surveys.find(s => s.isActive)?.id || surveys[0]?.id || '';
+  });
   const [timeFilter, setTimeFilter] = useState(14);
   const [editingSurveyId, setEditingSurveyId] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -199,7 +201,8 @@ const App: React.FC = () => {
     localStorage.setItem('ci_stores_v5', JSON.stringify(stores));
     localStorage.setItem('ci_configs_v5', JSON.stringify(surveys));
     localStorage.setItem('ci_users_v5', JSON.stringify(users));
-  }, [submissions, stores, surveys, users]);
+    if (activeSurveyId) localStorage.setItem('ci_active_survey_id', activeSurveyId);
+  }, [submissions, stores, surveys, users, activeSurveyId]);
 
   const isVisible = (q: SurveyQuestion, answers: Record<string, any>) => {
     if (!q.dependsOn) return true;
@@ -654,11 +657,7 @@ const App: React.FC = () => {
                                 onClick={() => {
                                   if (idx === 0) return;
                                   const prevQ = s.questions[idx - 1];
-                                  if (!prevQ) {
-                                    alert(`DEBUG ERRO: Não encontrei pergunta anterior. Index: ${idx}`);
-                                    return;
-                                  }
-                                  alert(`DEBUG: Criando dependência da Pergunta #${idx + 1} para a Pergunta #${idx} (ID: ${prevQ.id})`);
+                                  if (!prevQ) return;
                                   setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, dependsOn: { questionId: prevQ.id, value: 'Sim' } } : qu) } : sv));
                                 }}
                                 disabled={idx === 0}
