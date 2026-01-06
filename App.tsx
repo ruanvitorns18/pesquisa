@@ -106,7 +106,9 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [view, setView] = useState<'survey' | 'dashboard' | 'admin'>('survey');
+  const [view, setView] = useState<'survey' | 'dashboard' | 'admin'>(() => {
+    return (localStorage.getItem('ci_last_view') as any) || 'survey';
+  });
   const [adminSubView, setAdminSubView] = useState<'list' | 'editor'>('list');
   const [activeSurveyId, setActiveSurveyId] = useState<string>(() => surveys.find(s => s.isActive)?.id || surveys[0]?.id || '');
   const [timeFilter, setTimeFilter] = useState(14);
@@ -142,12 +144,12 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Forçar a tela de Coleta sempre que o usuário mudar (login)
+  // Persist view state
   useEffect(() => {
-    if (currentUser) {
-      setView('survey');
+    if (currentUser && view) {
+      localStorage.setItem('ci_last_view', view);
     }
-  }, [currentUser]);
+  }, [view, currentUser]);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -179,6 +181,7 @@ const App: React.FC = () => {
       password: pass,
     });
     if (error) throw error;
+    setView('survey'); // Force default view only on explicit login
   };
 
   const handleLogout = async () => {
