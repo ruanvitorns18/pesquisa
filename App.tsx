@@ -635,8 +635,8 @@ const App: React.FC = () => {
                                   onChange={e => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, dependsOn: { ...qu.dependsOn!, questionId: e.target.value } } : qu) } : sv))}
                                   className="bg-transparent text-[10px] font-bold text-orange-800 outline-none border-b border-orange-300 w-24"
                                 >
-                                  {s.questions.slice(0, idx).map(prevQ => (
-                                    <option key={prevQ.id} value={prevQ.id}>{prevQ.label.substring(0, 15)}...</option>
+                                  {s.questions.slice(0, idx).map((prevQ, pIdx) => (
+                                    <option key={prevQ.id} value={prevQ.id}>#{pIdx + 1} - {prevQ.label.substring(0, 10)}...</option>
                                   ))}
                                 </select>
                                 <span className="text-[9px] font-black text-orange-400 uppercase">=</span>
@@ -653,9 +653,13 @@ const App: React.FC = () => {
                               <button
                                 onClick={() => {
                                   if (idx === 0) return;
-                                  const prevQId = s.questions[idx - 1]?.id;
-                                  if (!prevQId) return;
-                                  setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, dependsOn: { questionId: prevQId, value: 'Sim' } } : qu) } : sv));
+                                  const prevQ = s.questions[idx - 1];
+                                  if (!prevQ) {
+                                    alert(`DEBUG ERRO: Não encontrei pergunta anterior. Index: ${idx}`);
+                                    return;
+                                  }
+                                  alert(`DEBUG: Criando dependência da Pergunta #${idx + 1} para a Pergunta #${idx} (ID: ${prevQ.id})`);
+                                  setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, dependsOn: { questionId: prevQ.id, value: 'Sim' } } : qu) } : sv));
                                 }}
                                 disabled={idx === 0}
                                 className={`flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed text-[10px] font-bold uppercase tracking-widest transition-all ${idx === 0 ? 'opacity-50 cursor-not-allowed border-slate-200 text-slate-300' : 'border-slate-300 text-slate-500 hover:border-orange-400 hover:text-orange-600 hover:bg-orange-50'}`}
