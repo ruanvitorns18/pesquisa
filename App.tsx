@@ -644,7 +644,7 @@ const App: React.FC = () => {
                               </div>
                             ) : (
                               <button
-                                onClick={() => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, dependsOn: { questionId: s.questions[0]?.id || '', value: 'Sim' } } : qu) } : sv))}
+                                onClick={() => setSurveys(surveys.map(sv => sv.id === s.id ? { ...sv, questions: sv.questions.map(qu => qu.id === q.id ? { ...qu, dependsOn: { questionId: s.questions[idx - 1]?.id || '', value: 'Sim' } } : qu) } : sv))}
                                 disabled={idx === 0}
                                 className={`flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed text-[10px] font-bold uppercase tracking-widest transition-all ${idx === 0 ? 'opacity-50 cursor-not-allowed border-slate-200 text-slate-300' : 'border-slate-300 text-slate-500 hover:border-orange-400 hover:text-orange-600 hover:bg-orange-50'}`}
                               >
