@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { NPSInput } from './components/NPSInput';
+
 import {
   SurveySubmission,
   User,
@@ -235,9 +235,7 @@ const App: React.FC = () => {
     const s = surveys.find(x => x.id === activeSurveyId);
     return (
       <div className="max-w-xl mx-auto animate-slideUp">
-        <div className="bg-emerald-500 text-white text-center py-2 font-black uppercase tracking-widest text-xs mb-4 rounded-full animate-bounce shadow-xl">
-          ✨ ATUALIZAÇÃO 100% OK - NPS CORRIGIDO ✨
-        </div>
+
         <div className="card-premium overflow-hidden border-t-[10px] border-[#FF6B00]">
           <div className="bg-[#0F172A] p-6 md:p-8 text-white flex justify-between items-center">
             <div>
@@ -324,7 +322,27 @@ const App: React.FC = () => {
                 </div>
               ))}
               <div className="pt-10 border-t border-slate-100">
-                <NPSInput value={formData.npsScore} onChange={v => setFormData({ ...formData, npsScore: v })} />
+                <div className="mb-6">
+                  <div className="flex justify-between items-end mb-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Qual a nota para sua experiência hoje? (NPS)</label>
+                    <span className="text-[10px] text-slate-400 italic">0 = Muito insatisfeito | 10 = Muito satisfeito</span>
+                  </div>
+                  <div className="flex gap-1 overflow-x-auto pb-2 md:gap-2 no-scrollbar">
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, npsScore: num })}
+                        className={`flex-1 min-w-[32px] h-10 flex items-center justify-center rounded-lg font-black transition-all text-xs ${formData.npsScore === num
+                          ? 'bg-orange-600 text-white shadow-lg shadow-orange-100 scale-105 z-10'
+                          : 'bg-slate-50 text-slate-400 hover:bg-slate-100 border border-slate-100'
+                          }`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
