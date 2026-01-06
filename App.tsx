@@ -555,6 +555,10 @@ const App: React.FC = () => {
             </div>
 
             {/* Lista de Perguntas (Blocos Visuais) */}
+            <div className="flex items-center gap-4 py-4 border-b border-slate-100 mb-6">
+              <h3 className="text-lg font-display font-bold text-slate-700 uppercase tracking-widest">Fluxo de Perguntas</h3>
+              <span className="bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg shadow-red-500/30 animate-pulse">V1.2 - DEBUG FIX ATIVO</span>
+            </div>
             <div className="space-y-6">
               {s.questions.map((q, idx) => (
                 <div key={q.id} className="relative group">
