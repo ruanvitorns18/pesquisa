@@ -559,7 +559,7 @@ const App: React.FC = () => {
               {s.questions.map((q, idx) => (
                 <div key={q.id} className="relative group">
                   <div className="absolute -left-4 top-8 -bottom-8 w-0.5 bg-slate-200 group-last:hidden"></div>
-                  <div className={`card-premium p-8 border-l-[6px] transition-all hover:shadow-xl ${q.dependsOn ? 'border-orange-400 ml-8 bg-orange-50/30' : 'border-[#0F172A]'}`}>
+                  <div className={`card-premium p-8 border-l-[6px] transition-all hover:shadow-xl ${q.dependsOn ? 'border-orange-400 bg-orange-50/30' : 'border-[#0F172A]'}`}>
 
                     {/* Topo do Card: Número e Ações */}
                     <div className="flex justify-between items-start mb-6">
