@@ -88,20 +88,13 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
 
-  const [stores, setStores] = useState<Store[]>(() => {
-    const saved = localStorage.getItem('ci_stores_v5');
-    return saved ? JSON.parse(saved) : STORES;
-  });
+  const [stores, setStores] = useState<Store[]>([]);
+  const [storesLoading, setStoresLoading] = useState(true);
 
-  const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem('ci_users_v5');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [users, setUsers] = useState<User[]>([]);
 
-  const [surveys, setSurveys] = useState<SurveyConfig[]>(() => {
-    const saved = localStorage.getItem('ci_configs_v5');
-    return saved ? JSON.parse(saved) : [DEFAULT_SURVEY];
-  });
+  const [surveys, setSurveys] = useState<SurveyConfig[]>([]);
+  const [surveysLoading, setSurveysLoading] = useState(true);
 
   const [submissions, setSubmissions] = useState<SurveySubmission[]>(() => {
     const saved = localStorage.getItem('ci_subs_v5');
@@ -156,9 +149,17 @@ const App: React.FC = () => {
       if (data) {
         setSubmissions(prev => {
           const existing = new Set(prev.map(p => p.id));
+          // Map snake_case DB columns to camelCase JS properties
           const newRemote = data.filter(d => !existing.has(d.id)).map(d => ({
-            ...d,
-            answers: typeof d.answers === 'string' ? JSON.parse(d.answers) : d.answers // handle JSONB if needed
+            id: d.id,
+            surveyId: d.survey_id,
+            storeId: d.store_id,
+            customerName: d.customer_name,
+            gender: d.gender,
+            ageRange: d.age_range,
+            answers: typeof d.answers === 'string' ? JSON.parse(d.answers) : d.answers,
+            npsScore: d.nps_score,
+            timestamp: d.timestamp
           }));
           return [...newRemote, ...prev].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         });
@@ -166,6 +167,107 @@ const App: React.FC = () => {
     };
     fetchSubmissions();
   }, [currentUser]);
+
+  // Fetch Stores from Supabase
+  useEffect(() => {
+    const fetchStores = async () => {
+      setStoresLoading(true);
+      const { data, error } = await supabase.from('stores').select('*');
+      if (data && data.length > 0) {
+        setStores(data.map(s => ({ id: s.id, name: s.name, city: '', state: '' })));
+      } else {
+        // Fallback to localStorage if no stores in DB
+        const saved = localStorage.getItem('ci_stores_v5');
+        if (saved) {
+          const localStores = JSON.parse(saved);
+          setStores(localStores);
+          // Migrate local stores to Supabase
+          for (const store of localStores) {
+            await supabase.from('stores').upsert({ id: store.id, name: store.name });
+          }
+        } else {
+          setStores(STORES);
+          // Seed default stores to Supabase
+          for (const store of STORES) {
+            await supabase.from('stores').upsert({ id: store.id, name: store.name });
+          }
+        }
+      }
+      setStoresLoading(false);
+    };
+    fetchStores();
+  }, []);
+
+  // Fetch Survey Configs from Supabase
+  useEffect(() => {
+    const fetchSurveyConfigs = async () => {
+      setSurveysLoading(true);
+      const { data, error } = await supabase.from('survey_configs').select('*');
+      if (data && data.length > 0) {
+        setSurveys(data.map(s => ({
+          id: s.id,
+          name: s.name,
+          description: s.description || '',
+          isActive: s.is_active,
+          questions: s.questions || [],
+          createdAt: s.created_at
+        })));
+        if (!activeSurveyId) {
+          setActiveSurveyId(data.find(s => s.is_active)?.id || data[0]?.id || '');
+        }
+      } else {
+        // Fallback to localStorage if no surveys in DB
+        const saved = localStorage.getItem('ci_configs_v5');
+        if (saved) {
+          const localSurveys = JSON.parse(saved);
+          setSurveys(localSurveys);
+          // Migrate local surveys to Supabase
+          for (const survey of localSurveys) {
+            await supabase.from('survey_configs').upsert({
+              id: survey.id,
+              name: survey.name,
+              description: survey.description,
+              is_active: survey.isActive,
+              questions: survey.questions,
+              created_at: survey.createdAt
+            });
+          }
+        } else {
+          setSurveys([DEFAULT_SURVEY]);
+          // Seed default survey to Supabase
+          await supabase.from('survey_configs').upsert({
+            id: DEFAULT_SURVEY.id,
+            name: DEFAULT_SURVEY.name,
+            description: DEFAULT_SURVEY.description,
+            is_active: DEFAULT_SURVEY.isActive,
+            questions: DEFAULT_SURVEY.questions,
+            created_at: DEFAULT_SURVEY.createdAt
+          });
+        }
+      }
+      setSurveysLoading(false);
+    };
+    fetchSurveyConfigs();
+  }, []);
+
+  // Fetch Manager Users from Supabase profiles
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'MANAGER');
+      if (data) {
+        setUsers(data.map(p => ({
+          id: p.id,
+          username: p.username || p.id,
+          role: p.role,
+          assignedStoreId: p.assigned_store_id
+        })));
+      }
+    };
+    fetchUsers();
+  }, []);
 
   // Persist view state
   useEffect(() => {
@@ -215,16 +317,36 @@ const App: React.FC = () => {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - timeFilter);
 
-    return submissions.filter(s => new Date(s.timestamp) >= cutoffDate && (!storeFilter || s.storeId === storeFilter));
-  }, [submissions, timeFilter, storeFilter]);
+    return submissions.filter(s => {
+      const dateOk = new Date(s.timestamp) >= cutoffDate;
+      const roleOk = currentUser?.role?.toUpperCase() === 'ADMIN' ? (!storeFilter || s.storeId === storeFilter) : (s.storeId === currentUser?.assignedStoreId);
+      return dateOk && roleOk;
+    });
+  }, [submissions, timeFilter, storeFilter, currentUser]);
 
   useEffect(() => {
     localStorage.setItem('ci_subs_v5', JSON.stringify(submissions));
-    localStorage.setItem('ci_stores_v5', JSON.stringify(stores));
-    localStorage.setItem('ci_configs_v5', JSON.stringify(surveys));
-    localStorage.setItem('ci_users_v5', JSON.stringify(users));
     if (activeSurveyId) localStorage.setItem('ci_active_survey_id', activeSurveyId);
-  }, [submissions, stores, surveys, users, activeSurveyId]);
+  }, [submissions, activeSurveyId]);
+
+  // Sync surveys to Supabase when changed
+  useEffect(() => {
+    if (surveysLoading || surveys.length === 0) return;
+
+    const syncSurveys = async () => {
+      for (const survey of surveys) {
+        await supabase.from('survey_configs').upsert({
+          id: survey.id,
+          name: survey.name,
+          description: survey.description,
+          is_active: survey.isActive,
+          questions: survey.questions,
+          created_at: survey.createdAt
+        });
+      }
+    };
+    syncSurveys();
+  }, [surveys, surveysLoading]);
 
   const isVisible = (q: SurveyQuestion, answers: Record<string, any>) => {
     if (!q.dependsOn) return true;
@@ -251,13 +373,26 @@ const App: React.FC = () => {
             e.preventDefault();
             const storeId = currentUser?.assignedStoreId || formData.storeId;
             if (!storeId) return alert("Erro: Identifique a unidade primeiro.");
-            const newSub = { ...formData, id: Date.now().toString(), surveyId: activeSurveyId, timestamp: new Date().toISOString(), storeId };
+            // Generate proper UUID for Supabase
+            const newSub = { ...formData, id: crypto.randomUUID(), surveyId: activeSurveyId, timestamp: new Date().toISOString(), storeId };
 
             // Optimistic Update
             setSubmissions([newSub, ...submissions]);
 
-            // Backend Sync
-            supabase.from('survey_submissions').insert(newSub).then(({ error }) => {
+            // Backend Sync - map camelCase to snake_case
+            const dbPayload = {
+              id: newSub.id,
+              survey_id: newSub.surveyId,
+              store_id: newSub.storeId,
+              customer_name: newSub.customerName,
+              gender: newSub.gender,
+              age_range: newSub.ageRange,
+              answers: newSub.answers,
+              nps_score: newSub.npsScore,
+              timestamp: newSub.timestamp,
+              user_id: currentUser?.id || null
+            };
+            supabase.from('survey_submissions').insert(dbPayload).then(({ error }) => {
               if (error) console.error('Error syncing submission:', error);
             });
 
@@ -290,18 +425,26 @@ const App: React.FC = () => {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Selecione a Unidade</label>
-                    <select
-                      value={formData.storeId}
-                      onChange={e => setFormData({ ...formData, storeId: e.target.value })}
-                      className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-semibold outline-none focus:border-[#FF6B00] shadow-sm appearance-none"
-                      required
-                    >
-                      <option value="">Selecione uma loja...</option>
-                      {stores.map(store => (
-                        <option key={store.id} value={store.id}>{store.name} - {store.city}/{store.state}</option>
-                      ))}
-                    </select>
+                    {currentUser?.role?.toUpperCase() === 'ADMIN' ? (
+                      <>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Selecione a Unidade (Admin)</label>
+                        <select
+                          value={formData.storeId}
+                          onChange={e => setFormData({ ...formData, storeId: e.target.value })}
+                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-semibold outline-none focus:border-[#FF6B00] shadow-sm appearance-none"
+                          required
+                        >
+                          <option value="">Selecione uma loja...</option>
+                          {stores.map(store => (
+                            <option key={store.id} value={store.id}>{store.name} - {store.city}/{store.state}</option>
+                          ))}
+                        </select>
+                      </>
+                    ) : (
+                      <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-500 font-bold text-sm text-center">
+                        Conta sem unidade vinculada. Contate o suporte.
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -367,12 +510,16 @@ const App: React.FC = () => {
             <h2 className="text-4xl font-display text-[#0F172A] tracking-tighter">Radar Estratégico</h2>
             <div className="flex flex-wrap justify-center lg:justify-start gap-3 items-center">
 
-              <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest mr-4">Filtros:</span>
-              <select value={storeFilter} onChange={e => setStoreFilter(e.target.value)} className="bg-slate-100 text-[10px] font-black uppercase p-2.5 rounded-xl outline-none text-slate-600 border border-slate-200">
-                <option value="">Todas as Unidades</option>
-                {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-              <div className="w-px h-6 bg-slate-200 mx-2"></div>
+              {currentUser?.role?.toUpperCase() === 'ADMIN' && (
+                <>
+                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest mr-4">Filtros:</span>
+                  <select value={storeFilter} onChange={e => setStoreFilter(e.target.value)} className="bg-slate-100 text-[10px] font-black uppercase p-2.5 rounded-xl outline-none text-slate-600 border border-slate-200">
+                    <option value="">Todas as Unidades</option>
+                    {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                  <div className="w-px h-6 bg-slate-200 mx-2"></div>
+                </>
+              )}
               {TIME_FILTERS.map(tf => (
                 <button key={tf.value} onClick={() => setTimeFilter(tf.value)} className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase transition-all ${timeFilter === tf.value ? 'bg-[#0F172A] text-white shadow-xl' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'} `}>{tf.label}</button>
               ))}
@@ -515,15 +662,22 @@ const App: React.FC = () => {
                 {stores.map(st => (
                   <div key={st.id} className="p-4 bg-slate-50 rounded-xl flex justify-between items-center border border-slate-100 group hover:border-[#FF6B00] transition-all">
                     <span className="font-bold text-slate-700 text-sm">{st.name}</span>
-                    <button onClick={() => setStores(stores.filter(x => x.id !== st.id))} className="p-2 text-rose-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={async () => {
+                      await supabase.from('stores').delete().eq('id', st.id);
+                      setStores(stores.filter(x => x.id !== st.id));
+                    }} className="p-2 text-rose-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 ))}
                 <div className="flex gap-3 pt-4">
                   <input id="store-new" type="text" placeholder="Nome da Unidade" className="flex-1 p-4 bg-white border border-slate-200 rounded-xl font-bold text-xs outline-none focus:border-[#FF6B00] focus:ring-4 focus:ring-orange-500/10 transition-all" />
-                  <button onClick={() => {
+                  <button onClick={async () => {
                     const i = document.getElementById('store-new') as HTMLInputElement;
-                    if (i.value) setStores([...stores, { id: Date.now().toString(), name: i.value }]);
-                    i.value = '';
+                    if (i.value) {
+                      const newStore = { id: Date.now().toString(), name: i.value };
+                      await supabase.from('stores').insert(newStore);
+                      setStores([...stores, newStore]);
+                      i.value = '';
+                    }
                   }} className="bg-[#0F172A] text-white px-6 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 shadow-xl transition-all"><Plus className="w-4 h-4" /></button>
                 </div>
               </div>
@@ -577,7 +731,14 @@ const App: React.FC = () => {
 
                         // Main client update for profile (since admin has rights)
                         if (authData.user) {
-                          await supabase.from('profiles').update({ assigned_store_id: s.value }).eq('id', authData.user.id);
+                          // Wait for trigger to create profile
+                          const updateProfile = async (attempts = 0) => {
+                            if (attempts > 3) return;
+                            await new Promise(r => setTimeout(r, 1000)); // Wait 1s
+                            const { error } = await supabase.from('profiles').update({ assigned_store_id: s.value }).eq('id', authData.user!.id);
+                            if (error) await updateProfile(attempts + 1);
+                          };
+                          await updateProfile();
                         }
 
                         const newUser: User = {
