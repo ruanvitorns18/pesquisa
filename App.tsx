@@ -234,15 +234,16 @@ const App: React.FC = () => {
           }
         } else {
           setSurveys([DEFAULT_SURVEY]);
-          // Seed default survey to Supabase
-          await supabase.from('survey_configs').upsert({
+          // Seed default survey to Supabase ONLY if it doesn't exist
+          // Using upsert with ignoreDuplicates to prevent overwriting existing data
+          const { error } = await supabase.from('survey_configs').upsert({
             id: DEFAULT_SURVEY.id,
             name: DEFAULT_SURVEY.name,
             description: DEFAULT_SURVEY.description,
             is_active: DEFAULT_SURVEY.isActive,
             questions: DEFAULT_SURVEY.questions,
             created_at: DEFAULT_SURVEY.createdAt
-          });
+          }, { ignoreDuplicates: true });
         }
       }
       setSurveysLoading(false);
